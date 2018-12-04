@@ -1358,27 +1358,31 @@ var (
 		"#1348 @ 571,488: 22x10",
 		"#1349 @ 979,160: 19x17",
 	}
+
+	allClaims [][]int
+	fabric    [1000][1000]int
 )
 
 func part1() {
-	var fabric [1000][1000]int
 	var overlaps int
 
 	for _, claimCordinate := range claimCordinates {
 		disX, disY, dimX, dimY := getCordinate(claimCordinate)
+
+		allClaims = append(allClaims, []int{disX, disY, dimX, dimY})
 
 		// Asse delle Y
 		for y := disY; y < disY+dimY; y++ {
 			// Asse delle X
 			for x := disX; x < disX+dimX; x++ {
 				// Se a 0 vuol dire che non è in conflitto con nessuno
-				if fabric[x][y] == 0 {
+				if fabric[y][x] == 0 {
 					// Riempio la superfice di quel punto
-					fabric[x][y] = 1
-				} else if fabric[x][y] == 1 {
+					fabric[y][x] = 1
+				} else if fabric[y][x] == 1 {
 					// Registro sovrapposizione e diversifico per eliminarlo dal ulterirore conteggio
 					overlaps++
-					fabric[x][y]++
+					fabric[y][x]++
 				}
 			}
 		}
@@ -1387,7 +1391,38 @@ func part1() {
 	fmt.Println("************ PART 1 ************")
 	fmt.Println(overlaps)
 	fmt.Println("********************************")
+}
 
+func part2() {
+	// Stesso gioco di prima solo che adesso uso le cordinate già pulite e verifico quello che ha tutta l'area della fabbrica a 1, nel ciclo uso logia inversa
+	// L'indice non me lo sono salvato perchè progressivo "modificare in caso getCordinate e farselo ritornare"
+	for i, claim := range allClaims {
+		var overlap bool
+		var disX = claim[0]
+		var disY = claim[1]
+		var dimX = claim[2]
+		var dimY = claim[3]
+
+		for y := disY; y < disY+dimY; y++ {
+			if overlap {
+				break
+			}
+			for x := disX; x < disX+dimX; x++ {
+				if fabric[y][x] != 1 {
+					overlap = true
+					break
+				}
+			}
+		}
+
+		// Non ho trovato sovrapposizione OLÈ!👻
+		if !overlap {
+			fmt.Println("************ PART 2 ************")
+			fmt.Println(i + 1)
+			fmt.Println("********************************")
+			break
+		}
+	}
 }
 
 func getCordinate(claimCordinate string) (int, int, int, int) {
@@ -1409,4 +1444,5 @@ func getCordinate(claimCordinate string) (int, int, int, int) {
 
 func main() {
 	part1()
+	part2()
 }
