@@ -18,6 +18,28 @@ var (
 // Appunti
 // verificare solo condizioni tra le 00.00 e le 00.59
 
+//Times - Times
+type Times struct {
+	Minuti int
+	Valore int
+}
+
+// Add - Times add
+func (t Times) Add() {
+
+	t.Valore = 7
+	log.Println("sono qui", t)
+}
+
+// Test - Test
+type Test struct {
+	Guard int
+	Times []Times
+}
+
+// Tests - tests
+type Tests []Test
+
 func main() {
 
 	// guardsTime = append(guards)
@@ -30,23 +52,54 @@ func main() {
 	}
 
 	// guardsSleep := make(map[int]int)
-	guardsTotalTime := make(map[int][]int)
+	// guardsTotalTime := make(map[int][]int)
+	// guardsTotalTime := make(prova []test)
 
-	guardsTotalTime[0] = []int{2}
-	guardsTotalTime[1] = []int{1}
-	// guardsTime[1][5] = 1
+	// guardsTotalTime[0] = []int{2}
+	// guardsTotalTime[1] = []int{1}
 
-	log.Println(guardsTotalTimex)
+	time1 := Times{Minuti: 1, Valore: 2}
+	time2 := Times{Minuti: 2, Valore: 5}
 
-	// Prendo ciclando per guardia
-	for index := 0; index < len(guardsTotalTime[1]); index++ {
+	add := Test{Guard: 1, Times: []Times{time1, time2}}
+	add2 := Test{Guard: 2, Times: []Times{Times{Minuti: 4, Valore: 5}}}
 
-		// Ciclo minuti per recupeare valore
-		guardsTotalTimex := guardsTotalTime[index]
-		log.Println(guardsTotalTimex)
+	guardsTotalTime := Tests{}
+	guardsTotalTime = append(guardsTotalTime, add)
+	guardsTotalTime = append(guardsTotalTime, add2)
+
+	// prova di una modifica di un valore
+
+	for _, v := range guardsTotalTime {
+		if v.Guard == 1 {
+			// log.Println(i, v)
+			for _, vt := range v.Times {
+				if vt.Minuti == 1 {
+					log.Println(vt)
+					vt = vt.Add(vt)
+					// log.Println(guardsTotalTime)
+
+				}
+
+				// log.Println(it, vt)
+			}
+		}
 	}
 
-	//OK da qui in giù
+	log.Println(guardsTotalTime)
+
+	// log.Println(guardsTotalTimex)
+
+	// // Prendo ciclando per guardia
+	// for index := 0; index < len(guardsTotalTime[1]); index++ {
+
+	// 	// Ciclo minuti per recupeare valore
+	// 	guardsTotalTimex := guardsTotalTime[index]
+	// 	guardsTotalTimex = 4
+	// 	log.Println(guardsTotalTimex)
+	// }
+
+	//OK da qui in giù________________________________________________________
 
 	// var currentGuard int
 
