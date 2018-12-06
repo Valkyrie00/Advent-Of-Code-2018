@@ -25,7 +25,7 @@ type Times struct {
 }
 
 // Add - Times add
-func (t Times) Add() {
+func (t *Times) Add() {
 
 	t.Valore = 7
 	log.Println("sono qui", t)
@@ -73,10 +73,14 @@ func main() {
 	for _, v := range guardsTotalTime {
 		if v.Guard == 1 {
 			// log.Println(i, v)
-			for _, vt := range v.Times {
+
+			for it, vt := range v.Times {
 				if vt.Minuti == 1 {
+
+					// Aggiungo
+					v.Times[it].Add()
 					log.Println(vt)
-					vt = vt.Add(vt)
+					// vt = vt.Add(vt)
 					// log.Println(guardsTotalTime)
 
 				}
