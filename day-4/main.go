@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"os"
 	"sort"
@@ -11,38 +12,30 @@ import (
 
 var (
 	lines []string
-	// guards map[int]int
-	// guardsTime map[int][]int
 )
 
-// Appunti
-// verificare solo condizioni tra le 00.00 e le 00.59
-
-//Times - Times
-type Times struct {
-	Minuti int
-	Valore int
-}
-
-// Add - Times add
-func (t *Times) Add() {
-
-	t.Valore = 7
-	log.Println("sono qui", t)
-}
-
-// Test - Test
-type Test struct {
+// GuardTimes - GuardTimes
+type GuardTimes struct {
 	Guard int
-	Times []Times
+	Times map[int]int
 }
 
-// Tests - tests
-type Tests []Test
+func (t *GuardTimes) serachMax() (int, int) {
+	var index, value int
+	for i, v := range t.Times {
+		if v > value {
+			value = v
+			index = i
+		}
+	}
+
+	return index, value
+}
+
+// GuardsTimes - GuardsTimes
+type GuardsTimes []GuardTimes
 
 func main() {
-
-	// guardsTime = append(guards)
 
 	file := openFile("puzzle.txt")
 	// Registro tutte le linee
@@ -51,88 +44,110 @@ func main() {
 		panic("Errore durante lo scan :( ")
 	}
 
-	// guardsSleep := make(map[int]int)
-	// guardsTotalTime := make(map[int][]int)
-	// guardsTotalTime := make(prova []test)
+	guardsFalls := make(map[int]int)
+	guardsTotalTime := GuardsTimes{}
+	var currentGuard int
 
-	// guardsTotalTime[0] = []int{2}
-	// guardsTotalTime[1] = []int{1}
+	// Ciclo linee
+	for i, line := range lines {
+		if strings.Contains(line, "Guard") {
+			currentGuard = parseGuard(line)
 
-	time1 := Times{Minuti: 1, Valore: 2}
-	time2 := Times{Minuti: 2, Valore: 5}
+			// Se non esiste la guard la inserisco nuova e inizilizzo anche la nuova struct
+			if _, ok := guardsFalls[currentGuard]; !ok {
+				guardsTotalTime = append(guardsTotalTime, GuardTimes{Guard: currentGuard, Times: map[int]int{}})
+			}
 
-	add := Test{Guard: 1, Times: []Times{time1, time2}}
-	add2 := Test{Guard: 2, Times: []Times{Times{Minuti: 4, Valore: 5}}}
+		} else if strings.Contains(line, "falls") {
+			start := parseTime(line)
+			end := parseTime(lines[i+1])
+			diff := end - start
 
-	guardsTotalTime := Tests{}
-	guardsTotalTime = append(guardsTotalTime, add)
-	guardsTotalTime = append(guardsTotalTime, add2)
+			// Per vedere chi è che dorme di più
+			guardsFalls[currentGuard] = guardsFalls[currentGuard] + diff
 
-	// prova di una modifica di un valore
-
-	for _, v := range guardsTotalTime {
-		if v.Guard == 1 {
-			// log.Println(i, v)
-
-			for it, vt := range v.Times {
-				if vt.Minuti == 1 {
-
-					// Aggiungo
-					v.Times[it].Add()
-					log.Println(vt)
-					// vt = vt.Add(vt)
-					// log.Println(guardsTotalTime)
-
+			// Per vedere quando si addormentano di più
+			for _, vg := range guardsTotalTime {
+				if vg.Guard == currentGuard {
+					for i := start; i < end; i++ {
+						vg.Times[i]++
+					}
 				}
-
-				// log.Println(it, vt)
 			}
 		}
 	}
 
-	log.Println(guardsTotalTime)
+	// test := GuardTimes{}
 
-	// log.Println(guardsTotalTimex)
+	// Prendo quello che dorme di più
+	kingSleeperGuard := 0
+	kingSleeperGuardVal := 0
+	for guard, value := range guardsFalls {
+		if value > kingSleeperGuardVal {
+			kingSleeperGuard = guard
+			kingSleeperGuardVal = value
+		}
+		// log.Println(guard)
+	}
 
-	// // Prendo ciclando per guardia
-	// for index := 0; index < len(guardsTotalTime[1]); index++ {
+	// sort.Ints(guardsSleep)
+	log.Println("King")
+	log.Println(kingSleeperGuard)
+	log.Println("----------------------")
+	log.Println(guardsFalls)
+	log.Println("----------------------")
+	kingSleeperTime := 0
+	kingSleeperTimeValTime := 0
+	for _, vg := range guardsTotalTime {
+		if vg.Guard == kingSleeperGuard {
+			for time, value := range vg.Times {
+				if value > kingSleeperTimeValTime {
+					kingSleeperTime = time
+					kingSleeperTimeValTime = value
+				}
+			}
+			// log.Println(vg.Times)
+		}
+	}
+	log.Println("King Time")
+	log.Println(kingSleeperTime)
+	fmt.Println("************ PART 1 ************")
+	fmt.Println(kingSleeperGuard * kingSleeperTime)
+	fmt.Println("********************************")
 
-	// 	// Ciclo minuti per recupeare valore
-	// 	guardsTotalTimex := guardsTotalTime[index]
-	// 	guardsTotalTimex = 4
-	// 	log.Println(guardsTotalTimex)
-	// }
+	// Part 2
+	// var kingMaxMinute, kingMinute int
 
-	//OK da qui in giù________________________________________________________
+	// var maxGuard [60]int
+	// var maxMinute [60]int
 
-	// var currentGuard int
+	var guardMinuteCache [60]int // most minutes
+	var guardIDCache [60]int     // corresponding ID
+	for _, vg := range guardsTotalTime {
+		minute, val := vg.serachMax()
+		if val > guardMinuteCache[minute] {
+			guardMinuteCache[minute] = val
+			guardIDCache[minute] = vg.Guard
+		}
+		// fmt.Println(minute, val)
+	}
 
-	// for i, line := range lines {
-	// 	// log.Println(line)
+	// minute = 0
+	// max = 0
+	// guardID = 0
+	var kingMaxMinute, kingMinute, kingGuad int
+	for index, minutes := range guardMinuteCache {
+		if minutes > kingMaxMinute {
+			kingMaxMinute = minutes
+			kingMinute = index
+			kingGuad = guardIDCache[index]
+		}
+	}
 
-	// 	// var tempWakesUp int
+	fmt.Println(kingGuad * kingMinute)
 
-	// 	// log.Println(currentGuard, tempWakesUp)
-
-	// 	if strings.Contains(line, "Guard") {
-	// 		currentGuard = parseGuard(line)
-
-	// 	} else if strings.Contains(line, "falls") {
-	// 		start := parseTime(line)
-	// 		end := parseTime(lines[i+1])
-	// 		diff := end - start
-
-	// 		guardsSleep[currentGuard] = guardsSleep[currentGuard] + diff
-
-	// 		//
-
-	// 		// guardsTotalTime[currentGuard] = append(guardsTotalTime[currentGuard], map[int]int{parseTime(line): 2})
-
-	// 		// log.Println(diff)
-	// 	}
-	// }
-
-	// log.Println(guardsSleep)
+	// log.Println(kingMaxMinute)
+	// log.Println(kingGuardMinute * kingMinute)
 }
 
 func parseGuard(line string) int {
